@@ -10,10 +10,15 @@ import UIKit
 class ViewController: UITableViewController {
 
     var petitions = [Petition]()
+    var filteredPetitions = [Petition]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let urlString: String
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(credits))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(filteredCases))
+        
             
         if navigationController?.tabBarItem.tag == 0 {
             urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
@@ -24,10 +29,46 @@ class ViewController: UITableViewController {
         if let url = URL(string: urlString) {
             if let data = try? Data(contentsOf: url) {
              parse(json: data)
+                filteredPetitions = petitions
                 return
             }
         }
             showError()
+    }
+    
+    
+    @objc func filteredCases() {
+        let ac = UIAlertController(title: "Enter Your Filter", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+        
+        let submitAction = UIAlertAction(title: "Submit", style: .default) {
+                  [weak self, weak ac] _ in
+                  guard let answer = ac?.textFields?[0].text else { return }
+                  self?.submit(answer)
+              }
+ 
+                ac.addAction(submitAction)
+                present(ac, animated: true, completion: nil)
+    }
+    func submit(_ answer:String) {
+        filteredPetitions.removeAll(keepingCapacity: true)
+        for petition in petitions {
+            if petition.title.lowercased().contains(answer.lowercased()) {
+                filteredPetitions.append(petition)
+                
+            }
+        }
+        petitions += filteredPetitions
+        tableView.reloadData()
+        
+    }
+    
+    @objc func credits() {
+        
+        let ac = UIAlertController(title: "All data downloaded from:", message: "www.whitehouse.gov", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
+        
     }
     
     func showError() {
@@ -45,7 +86,7 @@ class ViewController: UITableViewController {
         }
     }
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return petitions.count
+        return filteredPetitions.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
