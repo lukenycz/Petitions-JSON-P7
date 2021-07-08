@@ -12,13 +12,16 @@ class ViewController: UITableViewController {
     var petitions = [Petition]()
     var filteredPetitions = [Petition]()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         let urlString: String
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(credits))
+        let creditsButton = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(credits))
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Filter", style: .plain, target: self, action: #selector(filteredCases))
         
+        let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTable))
+        navigationItem.rightBarButtonItems = [refresh, creditsButton]
             
         if navigationController?.tabBarItem.tag == 0 {
             urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
@@ -36,6 +39,9 @@ class ViewController: UITableViewController {
             showError()
     }
     
+    @objc func refreshTable(){
+        tableView.reloadData()
+    }
     
     @objc func filteredCases() {
         let ac = UIAlertController(title: "Enter Your Filter", message: nil, preferredStyle: .alert)
@@ -46,7 +52,6 @@ class ViewController: UITableViewController {
                   guard let answer = ac?.textFields?[0].text else { return }
                   self?.submit(answer)
               }
- 
                 ac.addAction(submitAction)
                 present(ac, animated: true, completion: nil)
     }
@@ -101,8 +106,5 @@ class ViewController: UITableViewController {
         vc.detailItem = petitions[indexPath.row]
         navigationController?.pushViewController(vc, animated: true)
     }
-    
-    
-
 }
 
