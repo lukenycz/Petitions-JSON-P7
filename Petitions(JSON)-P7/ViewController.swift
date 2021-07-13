@@ -22,12 +22,15 @@ class ViewController: UITableViewController {
         
         let refresh = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(refreshTable))
         navigationItem.rightBarButtonItems = [refresh, creditsButton]
+        
             
         if navigationController?.tabBarItem.tag == 0 {
             urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
         } else {
             urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
         }
+        
+        performSelector(inBackground: #selector(submit(_:)), with: nil)
         
         if let url = URL(string: urlString) {
             if let data = try? Data(contentsOf: url) {
@@ -55,7 +58,7 @@ class ViewController: UITableViewController {
                 ac.addAction(submitAction)
                 present(ac, animated: true, completion: nil)
     }
-    func submit(_ answer:String) {
+    @objc func submit(_ answer:String) {
         filteredPetitions.removeAll(keepingCapacity: true)
         for petition in petitions {
             if petition.title.lowercased().contains(answer.lowercased()) {
@@ -64,8 +67,7 @@ class ViewController: UITableViewController {
             }
         }
         petitions += filteredPetitions
-        tableView.reloadData()
-        
+        tableView.performSelector(onMainThread: #selector(UITableView.reloadData), with: nil, waitUntilDone: false)
     }
     
     @objc func credits() {
